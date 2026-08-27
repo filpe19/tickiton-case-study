@@ -1,140 +1,140 @@
 # TickiTon
 
-### Ticketing / Events / Payments / Transactional Systems
+### Bilheteria / Eventos / Pagamentos / Sistemas Transacionais
 
-## Overview
+## Visão Geral
 
-TickiTon is a private event ticketing platform documented here as a safe public engineering case study.
+TickiTon é uma plataforma privada de bilheteria para eventos documentada aqui como estudo de caso público e seguro.
 
-The product covers event discovery, ticket selection, checkout, payment confirmation, ticket generation, QR-based validation, producer operations, administrative workflows and refund handling.
+O produto cobre descoberta de eventos, seleção de ingressos, checkout, confirmação de pagamento, geração de ingressos, validação por QR Code, operação de produtores, fluxos administrativos e reembolsos.
 
-This repository does not contain proprietary source code, credentials, production URLs, customer data, database dumps or internal infrastructure details.
+Este repositório não contém código proprietário, credenciais, URLs de produção, dados de clientes, dumps de banco ou detalhes internos de infraestrutura.
 
-## Problem
+## Problema
 
-An event ticketing system is a transactional product. It must sell tickets without overselling stock, confirm payment before granting access, issue unique tickets, validate entry at the venue and keep producer/admin operations consistent while payments and webhooks may arrive asynchronously.
+Uma bilheteria é um sistema transacional. Ela precisa vender ingressos sem estourar estoque, confirmar pagamento antes de liberar acesso, emitir ingressos únicos, validar entrada no evento e manter produtor/admin alinhados enquanto pagamentos e webhooks chegam de forma assíncrona.
 
-## Solution
+## Solução
 
-The private codebase implements a custom PHP 8.2 backend with web and API routes, MySQL persistence, Mercado Pago Pix/card integration, signed QR ticket tokens, check-in services, producer dashboards, admin surfaces and reliability tests.
+O código privado implementa um backend customizado em PHP 8.2 com rotas web e API, persistência MySQL, integração Mercado Pago Pix/cartão, QR Codes assinados para ingressos, serviços de check-in, dashboards de produtor, superfícies administrativas e testes de confiabilidade.
 
-Stock reservation, coupon calculation, payment state transitions and ticket issuance are handled server-side so the frontend cannot decide transactional outcomes.
+Reserva de estoque, cálculo de cupom, transições de pagamento e emissão de ingresso são tratados no servidor, evitando que o frontend determine resultados transacionais.
 
-## Product Flow
+## Fluxo do Produto
 
 ```mermaid
 flowchart LR
-    A[Event] --> B[Ticket selection]
+    A[Evento] --> B[Selecao de ingresso]
     B --> C[Checkout]
-    C --> D[Stock reservation]
-    D --> E[Payment]
-    E --> F[Payment confirmation]
-    F --> G[Ticket issuance]
-    G --> H[Customer ticket]
-    H --> I[QR validation]
-    I --> J[Event access]
+    C --> D[Reserva de estoque]
+    D --> E[Pagamento]
+    E --> F[Confirmacao]
+    F --> G[Emissao do ingresso]
+    G --> H[Ingresso do cliente]
+    H --> I[Validacao QR]
+    I --> J[Acesso ao evento]
 ```
 
-## System Architecture
+## Arquitetura do Sistema
 
 ```mermaid
 flowchart TB
-    A[Participant web app] --> D[Custom PHP application]
-    B[Producer dashboard] --> D
-    C[Admin and validator tools] --> D
-    M[iOS demo/prototype] --> D
+    A[Web do participante] --> D[Aplicacao PHP customizada]
+    B[Dashboard do produtor] --> D
+    C[Ferramentas admin e validador] --> D
+    M[Demo/prototipo iOS] --> D
 
-    D --> E[Checkout service]
-    D --> F[Payment service]
-    D --> G[Ticket security service]
-    D --> H[Check-in service]
+    D --> E[Servico de checkout]
+    D --> F[Servico de pagamento]
+    D --> G[Servico de seguranca do ingresso]
+    D --> H[Servico de check-in]
     D --> I[(MySQL)]
 
-    F --> J[Mercado Pago Pix and card]
-    J --> K[Webhook inbox and payment refetch]
+    F --> J[Mercado Pago Pix e cartao]
+    J --> K[Inbox de webhook e refetch]
     K --> F
 ```
 
-## Tech Stack
+## Stack Técnica
 
-- Backend: PHP 8.2, custom PSR-4 application structure, PHPUnit.
-- Web/API: Public, participant, producer, validator and admin routes.
-- Database: MySQL.
-- Payments: Mercado Pago Pix and card checkout.
-- QR: Signed ticket tokens with HMAC validation.
-- Documents: PDF generation for ticket-related artifacts.
-- Mobile: Native SwiftUI iOS demo/prototype prepared for API integration; not presented as the primary production surface.
+- Backend: PHP 8.2, estrutura customizada PSR-4 e PHPUnit.
+- Web/API: rotas públicas, participante, produtor, validador e admin.
+- Banco de dados: MySQL.
+- Pagamentos: checkout Mercado Pago Pix e cartão.
+- QR: tokens de ingresso assinados com HMAC.
+- Documentos: geração de PDFs para artefatos relacionados a ingressos.
+- Mobile: demo/protótipo iOS nativo com SwiftUI preparado para integração com API; não apresentado como superfície principal de produção.
 
-## Backend Engineering
+## Engenharia Backend
 
-The backend includes routes and services for authentication, event browsing, checkout, participant orders, ticket display, producer event management, sales reporting, wallet operations, withdrawals, validators, check-in and admin operations.
+O backend inclui rotas e serviços para autenticação, navegação de eventos, checkout, pedidos do participante, visualização de ingressos, gestão de eventos pelo produtor, relatórios de venda, carteira, saques, validadores, check-in e operações administrativas.
 
-Checkout validates event status, ticket limits, lot availability, holder data, coupon rules and payment method constraints before an order can proceed.
+O checkout valida status do evento, limites de ingresso, disponibilidade de lote, dados dos participantes, regras de cupom e restrições de método de pagamento antes de permitir avanço do pedido.
 
-Ticket issuance is tied to payment finalization. The system does not grant valid ticket access simply because a checkout request was created.
+A emissão de ingresso é ligada à finalização do pagamento. O sistema não libera ingresso válido apenas porque uma tentativa de checkout foi criada.
 
-## Data / Database
+## Dados / Banco de Dados
 
-The private database model includes events, ticket types, orders, order items, tickets, users, producers, validators, check-ins, webhook events, refunds, disputes, wallet-related tables and operational audit data.
+O modelo privado inclui eventos, tipos de ingresso, pedidos, itens de pedido, ingressos, usuários, produtores, validadores, check-ins, eventos de webhook, reembolsos, disputas, carteira, suporte e dados de auditoria operacional.
 
-Stock reservation fields and order expiration indexes support checkout flows where demand and payment confirmation are not instantaneous.
+Campos de reserva de estoque e índices de expiração de pedido dão suporte a fluxos onde demanda e confirmação de pagamento não são instantâneas.
 
-## Integrations
+## Integrações
 
-- Mercado Pago Pix and card payment creation.
-- Mercado Pago webhook handling and payment refetch.
-- Email delivery for transactional communication.
-- Google authentication support.
-- PDF and QR generation libraries.
+- Criação de pagamentos Mercado Pago Pix e cartão.
+- Webhooks Mercado Pago e refetch de pagamento.
+- Entrega de e-mails transacionais.
+- Suporte a autenticação Google.
+- Bibliotecas de QR Code e PDF.
 
-## Security
+## Segurança
 
-Security-relevant implementation details confirmed in the private codebase:
+Detalhes confirmados no código privado:
 
-- Role-separated participant, producer, validator and admin workflows.
-- Signed QR ticket tokens using HMAC-SHA256.
-- Production requirement for strong ticket signing secrets.
-- Payment status validation before check-in.
-- Webhook signature validation.
-- Server-side stock, coupon and installment validation.
-- No public exposure of private source code or project Git history.
+- Fluxos separados por papéis: participante, produtor, validador e admin.
+- QR Code de ingresso assinado com HMAC-SHA256.
+- Exigência de segredo forte de assinatura em produção.
+- Validação de status de pagamento antes do check-in.
+- Validação de assinatura de webhook.
+- Validação server-side de estoque, cupom e parcelamento.
+- Nenhuma exposição pública de código-fonte privado ou histórico Git do projeto comercial.
 
-## Engineering Challenges
+## Desafios de Engenharia
 
-- Preventing oversold ticket inventory during concurrent checkout attempts.
-- Releasing expired reservations safely.
-- Avoiding duplicate ticket issuance when webhooks are retried.
-- Validating QR tickets without leaking predictable identifiers.
-- Blocking duplicate check-ins.
-- Handling refunds only after gateway confirmation.
-- Keeping participant, producer, validator and admin workflows consistent around the same order and ticket records.
+- Evitar overselling durante tentativas concorrentes de checkout.
+- Liberar reservas expiradas com segurança.
+- Evitar emissão duplicada de ingressos quando webhooks são reenviados.
+- Validar QR Code sem expor identificadores previsíveis.
+- Bloquear check-in duplicado.
+- Executar reembolso apenas após confirmação do gateway.
+- Manter participante, produtor, validador e admin consistentes em torno dos mesmos registros de pedido e ingresso.
 
-## Testing & Reliability
+## Testes e Confiabilidade
 
-The private project contains unit, feature and load-oriented tests around payment flows, stock reservation, ticket limits, coupon redemption, Google login, ticket holder ownership, QR security, transactional emails, refunds, readiness checks and security headers.
+O projeto privado contém testes unitários, de feature e de carga para pagamentos, reserva de estoque, limites de ingresso, cupons, login Google, propriedade dos participantes, segurança do QR, e-mails transacionais, reembolsos, readiness checks e headers de segurança.
 
-Load testing material and SQL invariant checks exist for high-volume event scenarios, including checks for no oversold stock, no duplicate QR/access codes and no double check-ins.
+Também existem materiais de teste de carga e invariantes SQL para cenários de evento com alto volume, incluindo validações contra estoque negativo, QR/acessos duplicados e check-ins repetidos.
 
-## Infrastructure & Deployment
+## Infraestrutura e Deploy
 
-The private repository includes deployment material for production-style hosting, including Docker/Cloud Run references, cPanel-oriented deployment documentation and Cloudflare recommendations. Exact domains, accounts and operational paths are intentionally not published.
+O repositório privado inclui material de deploy para hospedagem de produção, referências Docker/Cloud Run, documentação para cPanel e recomendações de Cloudflare. Domínios, contas e caminhos operacionais não são publicados.
 
-## Production
+## Produção
 
-The codebase contains production-readiness and operational documentation, including hardening work related to public asset rendering and event-load validation. This public case study avoids publishing sensitive endpoints or internal infrastructure details.
+O código contém documentação de readiness e operação, incluindo hardening de assets públicos e validação de carga para eventos. Este estudo de caso não publica endpoints sensíveis nem detalhes internos da infraestrutura.
 
-## Screenshots
+## Capturas de Tela
 
-Screenshots are not included in this repository because existing captures may contain checkout, participant or event data. Only sanitized screenshots should be added later.
+Capturas de tela não foram incluídas porque as imagens existentes podem conter dados de checkout, participantes ou eventos. Somente imagens sanitizadas devem ser adicionadas futuramente.
 
-## My Role / What I Built
+## Meu Papel / O Que Construí
 
-This case demonstrates backend and full-stack engineering for event ticketing: checkout, stock reservation, payment integration, QR ticket security, check-in, producer/admin tools, database modeling, tests and deployment preparation.
+Este case demonstra engenharia backend e full stack para bilheteria de eventos: checkout, reserva de estoque, integração de pagamento, segurança de QR Code, check-in, ferramentas de produtor/admin, modelagem de dados, testes e preparação de deploy.
 
-## Key Engineering Decisions
+## Decisões Técnicas Principais
 
-- Treat ticketing as a transactional workflow rather than a frontend purchase form.
-- Reserve inventory atomically before payment completion.
-- Issue tickets only after payment confirmation.
-- Sign QR payloads instead of exposing plain sequential identifiers.
-- Keep operational case-study documentation separate from the private commercial repository.
+- Tratar bilheteria como fluxo transacional, não como formulário de compra no frontend.
+- Reservar estoque de forma atômica antes da confirmação final.
+- Emitir ingressos somente após confirmação de pagamento.
+- Assinar payloads de QR em vez de expor identificadores sequenciais.
+- Manter a documentação pública separada do repositório comercial privado.
