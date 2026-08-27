@@ -1,0 +1,14 @@
+.DS_Store
+.env
+.env.*
+*.key
+*.pem
+*.p12
+*.sql
+*.dump
+*.sqlite
+node_modules/
+vendor/
+storage/
+uploads/
+screenshots/private/
