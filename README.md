@@ -2,13 +2,15 @@
 
 ### Bilheteria / Eventos / Pagamentos / Sistemas Transacionais
 
+No ar em [tickiton.com.br](https://tickiton.com.br) · App iOS na [App Store](https://apps.apple.com/br/app/tickiton/id6824281845)
+
 ## Visão Geral
 
-TickiTon é uma plataforma privada de bilheteria para eventos documentada aqui como estudo de caso público e seguro.
+TickiTon é uma plataforma de bilheteria para eventos, com web e app iOS nativo. O código é privado; este repositório documenta o produto como estudo de caso.
 
 O produto cobre descoberta de eventos, seleção de ingressos, checkout, confirmação de pagamento, geração de ingressos, validação por QR Code, operação de produtores, fluxos administrativos e reembolsos.
 
-Este repositório não contém código proprietário, credenciais, URLs de produção, dados de clientes, dumps de banco ou detalhes internos de infraestrutura.
+Este repositório não contém código proprietário, credenciais, dados de clientes, dumps de banco ou detalhes internos de infraestrutura.
 
 ## Problema
 
@@ -42,7 +44,7 @@ flowchart TB
     A[Web do participante] --> D[Aplicacao PHP customizada]
     B[Dashboard do produtor] --> D
     C[Ferramentas admin e validador] --> D
-    M[Demo/prototipo iOS] --> D
+    M[App iOS - SwiftUI] --> D
 
     D --> E[Servico de checkout]
     D --> F[Servico de pagamento]
@@ -63,7 +65,7 @@ flowchart TB
 - Pagamentos: checkout Mercado Pago Pix e cartão.
 - QR: tokens de ingresso assinados com HMAC.
 - Documentos: geração de PDFs para artefatos relacionados a ingressos.
-- Mobile: demo/protótipo iOS nativo com SwiftUI preparado para integração com API; não apresentado como superfície principal de produção.
+- Mobile: app iOS nativo em SwiftUI, publicado na App Store e ligado à mesma API da web.
 
 ## Engenharia Backend
 
@@ -115,6 +117,8 @@ O projeto privado contém testes unitários, de feature e de carga para pagament
 
 Também existem materiais de teste de carga e invariantes SQL para cenários de evento com alto volume, incluindo validações contra estoque negativo, QR/acessos duplicados e check-ins repetidos.
 
+Resultado de referência: 500 compradores disputando 300 vagas no mesmo lote terminaram com 300 ingressos vendidos e nenhum a mais.
+
 ## Infraestrutura e Deploy
 
 O repositório privado inclui material de deploy para hospedagem de produção, referências Docker/Cloud Run, documentação para cPanel e recomendações de Cloudflare. Domínios, contas e caminhos operacionais não são publicados.
@@ -125,11 +129,11 @@ O código contém documentação de readiness e operação, incluindo hardening 
 
 ## Capturas de Tela
 
-Capturas de tela não foram incluídas porque as imagens existentes podem conter dados de checkout, participantes ou eventos. Somente imagens sanitizadas devem ser adicionadas futuramente.
+Capturas de tela não foram incluídas porque as imagens existentes podem conter dados de checkout, participantes ou eventos.
 
 ## Meu Papel / O Que Construí
 
-Este case demonstra engenharia backend e full stack para bilheteria de eventos: checkout, reserva de estoque, integração de pagamento, segurança de QR Code, check-in, ferramentas de produtor/admin, modelagem de dados, testes e preparação de deploy.
+Este case demonstra engenharia backend e full stack para bilheteria de eventos: checkout, reserva de estoque, integração de pagamento, segurança de QR Code, check-in, ferramentas de produtor/admin, app iOS, modelagem de dados, testes e operação em produção.
 
 ## Decisões Técnicas Principais
 
